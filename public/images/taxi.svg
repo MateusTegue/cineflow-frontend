@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="40%" stop-color="#1e293b"/>
+      <stop offset="70%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="taxiYellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="wetStreet" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="headlightGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#fde047" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#eab308" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sky & City Backdrop -->
+  <rect width="400" height="600" fill="url(#skyGrad)"/>
+
+  <!-- City Skyline / Buildings in rain -->
+  <rect x="20" y="80" width="70" height="300" fill="#0f172a" opacity="0.9"/>
+  <rect x="100" y="40" width="90" height="340" fill="#090d16" opacity="0.95"/>
+  <rect x="200" y="100" width="80" height="280" fill="#1e293b" opacity="0.8"/>
+  <rect x="290" y="60" width="90" height="320" fill="#0f172a" opacity="0.9"/>
+
+  <!-- Building Windows / Warm Glows in Fog -->
+  <g fill="#fef08a" opacity="0.25">
+    <rect x="110" y="60" width="6" height="8"/><rect x="130" y="60" width="6" height="8"/><rect x="150" y="60" width="6" height="8"/>
+    <rect x="110" y="90" width="6" height="8"/><rect x="150" y="90" width="6" height="8"/>
+    <rect x="130" y="120" width="6" height="8"/><rect x="170" y="120" width="6" height="8"/>
+    <rect x="310" y="90" width="8" height="8"/><rect x="330" y="90" width="8" height="8"/><rect x="350" y="90" width="8" height="8"/>
+    <rect x="310" y="130" width="8" height="8"/><rect x="350" y="130" width="8" height="8"/>
+  </g>
+
+  <!-- Neon signs bokeh in background -->
+  <circle cx="90" cy="180" r="18" fill="#f43f5e" opacity="0.3"/>
+  <circle cx="320" cy="160" r="24" fill="#06b6d4" opacity="0.25"/>
+
+  <!-- Wet Street & Reflections -->
+  <polygon points="0,360 400,360 400,600 0,600" fill="url(#wetStreet)"/>
+  
+  <!-- Street neon reflections -->
+  <ellipse cx="140" cy="480" rx="90" ry="12" fill="#f59e0b" opacity="0.3"/>
+  <ellipse cx="280" cy="510" rx="70" ry="10" fill="#f43f5e" opacity="0.2"/>
+
+  <!-- Taxi Body (3/4 angle) -->
+  <!-- Roof & Cabin -->
+  <path d="M70 320 L120 250 L250 250 L290 320 Z" fill="#090d16" stroke="#1e293b" stroke-width="2"/>
+  <path d="M125 255 L245 255 L280 315 L125 315 Z" fill="#1e293b" opacity="0.9"/>
+  <!-- Taxi Sign -->
+  <rect x="170" y="235" width="45" height="15" rx="3" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+  <text x="176" y="246" font-size="8" font-weight="bold" fill="#000">TAXI</text>
+
+  <!-- Main Chassis -->
+  <path d="M30 320 Q20 340 30 380 L60 385 L80 430 L140 430 L160 385 L280 385 L300 430 L360 430 L380 370 Q385 330 350 320 Z" fill="url(#taxiYellow)"/>
+  
+  <!-- Hood and Windshield Reflection -->
+  <polygon points="120,260 250,260 280,315 75,315" fill="#38bdf8" opacity="0.25"/>
+  
+  <!-- Headlights -->
+  <ellipse cx="65" cy="355" rx="14" ry="10" fill="#fffbeb" stroke="#fbbf24" stroke-width="2"/>
+  <ellipse cx="340" cy="350" rx="12" ry="9" fill="#fffbeb" stroke="#fbbf24" stroke-width="2"/>
+  
+  <!-- Headlight Beams on wet road -->
+  <ellipse cx="50" cy="420" rx="60" ry="25" fill="url(#headlightGlow)"/>
+  <ellipse cx="350" cy="420" rx="50" ry="20" fill="url(#headlightGlow)"/>
+
+  <!-- Wheels -->
+  <ellipse cx="110" cy="420" rx="28" ry="28" fill="#09090b" stroke="#334155" stroke-width="4"/>
+  <circle cx="110" cy="420" r="12" fill="#64748b"/>
+  <ellipse cx="330" cy="420" rx="26" ry="26" fill="#09090b" stroke="#334155" stroke-width="4"/>
+  <circle cx="330" cy="420" r="11" fill="#64748b"/>
+
+  <!-- Rain streak lines -->
+  <g stroke="#94a3b8" stroke-width="1" opacity="0.3" stroke-linecap="round">
+    <line x1="40" y1="20" x2="30" y2="90"/>
+    <line x1="120" y1="10" x2="110" y2="80"/>
+    <line x1="220" y1="30" x2="210" y2="100"/>
+    <line x1="320" y1="15" x2="310" y2="85"/>
+    <line x1="80" y1="150" x2="70" y2="230"/>
+    <line x1="180" y1="140" x2="170" y2="220"/>
+    <line x1="280" y1="160" x2="270" y2="240"/>
+    <line x1="360" y1="130" x2="350" y2="210"/>
+  </g>
+</svg>
