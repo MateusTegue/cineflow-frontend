@@ -34,5 +34,9 @@ export function useAssets() {
     fetchAssets();
   }, [fetchAssets]);
 
-  return { assets, loading, error, refetch: fetchAssets };
+  const removeAsset = useCallback((id: string) => {
+    setAssets((prev) => prev.filter((a) => a.id !== id));
+  }, []);
+
+  return { assets, loading, error, refetch: fetchAssets, removeAsset };
 }

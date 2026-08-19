@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -34,8 +34,6 @@ export const ImageCard: React.FC<ImageCardProps> = ({
         isSelected && "ring-2 ring-blue-500 scale-105 z-30 shadow-blue-500/20"
       )}
     >
-      {/* Background Image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={image.imageUrl}
         alt=""
@@ -43,13 +41,10 @@ export const ImageCard: React.FC<ImageCardProps> = ({
         loading="eager"
       />
 
-      {/* Subtle Blue Glow / Highlight Border if elevated */}
       <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
 
-      {/* Bottom Gradient Overlay */}
       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
 
-      {/* Label */}
       <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
         <p className="text-white text-xs sm:text-sm font-semibold truncate tracking-tight drop-shadow-md">
           {image.title}

@@ -1,7 +1,7 @@
-// app/api/assets/route.ts
+﻿import axios from "axios";
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL; // ej: https://api.tudominio.com
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET() {
   if (!BACKEND_URL) {
@@ -12,24 +12,18 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(`${BACKEND_URL}/image-generation`, {
-      headers: {
-        // si tu backend requiere auth, agrégala aquí
-        // Authorization: `Bearer ${process.env.BACKEND_API_TOKEN}`,
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
+    const { data, status } = await axios.get(
+      `${BACKEND_URL}/image-generation`
+    );
+    return NextResponse.json(data, { status });
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
       return NextResponse.json(
-        { error: "Error al consultar el backend" },
-        { status: res.status }
+        error.response.data ?? { error: "Error al consultar el backend" },
+        { status: error.response.status }
       );
     }
 
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch (err) {
     return NextResponse.json(
       { error: "No se pudo conectar con el backend" },
       { status: 502 }

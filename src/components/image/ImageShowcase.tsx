@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { ImageCard, ShowcaseImage } from "./ImageCard";
@@ -47,10 +47,8 @@ export const ImageShowcase: React.FC<ImageShowcaseProps> = ({
 }) => {
   return (
     <div className="relative w-full flex items-center justify-center py-6 px-4">
-      {/* Decorative ambient lights */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Cards Deck */}
       <div className="relative flex items-center justify-center -space-x-3 sm:-space-x-5 md:-space-x-6 overflow-visible">
         {images.map((image) => (
           <ImageCard

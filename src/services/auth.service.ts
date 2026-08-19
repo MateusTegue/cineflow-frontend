@@ -1,3 +1,5 @@
+﻿import axios from "axios";
+
 export interface LoginResponse {
   data: {
     token: string;
@@ -21,20 +23,11 @@ export interface LoginResponse {
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    const response = await fetch(`${backendUrl}/auth`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
+    const { data } = await axios.post<LoginResponse>(`${backendUrl}/auth`, {
+      email,
+      password,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Error en la autenticación');
-    }
-
-    return response.json();
-  }
+    return data;
+  },
 };

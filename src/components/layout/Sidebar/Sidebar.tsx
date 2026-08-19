@@ -127,15 +127,23 @@ export const Sidebar = () => {
         })}
 
         {/* User Card */}
-        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow uppercase">
+        <Link
+          href="/admin/profile"
+          className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-indigo-500/30 hover:bg-slate-900/90 transition-all duration-200 group"
+          title="Ver perfil"
+        >
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow uppercase group-hover:scale-105 transition-transform duration-200">
             {user?.firstName?.substring(0, 2) || "CF"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-slate-200 truncate capitalize">{user?.firstName || "Creador AI"}</p>
-            <p className="text-[10px] text-slate-300 truncate">{user?.role?.name || "Plan Pro"}</p>
+            <p className="text-xs font-medium text-slate-200 truncate capitalize group-hover:text-indigo-300 transition-colors">
+              {user?.firstName || "Creador AI"}
+            </p>
+            <p className="text-[10px] text-slate-400 truncate">
+              {user?.role?.name || "Plan Pro"}
+            </p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );

@@ -1,16 +1,15 @@
-import { Asset, AssetsApiResponse  } from "@/types/asset";
+﻿import axios from "axios";
+import { Asset, AssetsApiResponse } from "@/types/asset";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
-
 export async function getAssets(): Promise<Asset[]> {
-  const res = await fetch(`${BACKEND_URL}/image-generation`);
-  if (!res.ok) throw new Error("Error al cargar los assets");
-  const json: AssetsApiResponse = await res.json();
-  return json.data;
+  const { data } = await axios.get<AssetsApiResponse>(
+    `${BACKEND_URL}/image-generation`
+  );
+  return data.data;
 }
 
 export async function deleteAsset(id: string): Promise<void> {
-  const res = await fetch(`${BACKEND_URL}/image-generation/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Error al eliminar el asset");
+  await axios.delete(`${BACKEND_URL}/comfyui/${id}`);
 }
