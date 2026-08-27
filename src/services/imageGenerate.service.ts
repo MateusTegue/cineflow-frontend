@@ -1,20 +1,23 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 export type ImageAspectRatio = "1:1" | "2:3" | "3:2" | "16:9" | "9:16";
 export type ImageQuality = "standard" | "hd" | "4k";
 
 export const IMAGE_MODELS = [
-  { value: "sd-xl-v1.0", label: "SDXL 1.0" },
+  { value: "krea2_turbo_fp8_scaled.safetensors", label: "Krea 2 Turbo (krea2_turbo_fp8_scaled.safetensors)" },
+  { value: "sd_xl_base_1.0.safetensors", label: "SDXL 1.0" },
+  { value: "v1-5-pruned-emaonly.safetensors", label: "Stable Diffusion 1.5" },
   { value: "sd-3-medium", label: "Stable Diffusion 3 Medium" },
-  { value: "flux-1-schnell", label: "FLUX.1 Schnell (rápido)" },
-  { value: "flux-1-dev", label: "FLUX.1 Dev (calidad)" },
+  { value: "flux-1-schnell", label: "FLUX.1 Schnell" },
+  { value: "flux-1-dev", label: "FLUX.1 Dev" },
 ] as const;
 
 export const IMAGE_SAMPLERS = [
-  { value: "DPM++ 2M Karras", label: "DPM++ 2M Karras" },
-  { value: "Euler a", label: "Euler ancestral" },
-  { value: "DDIM", label: "DDIM" },
-  { value: "UniPC", label: "UniPC" },
+  { value: "dpmpp_2m", label: "DPM++ 2M" },
+  { value: "euler_ancestral", label: "Euler Ancestral" },
+  { value: "euler", label: "Euler" },
+  { value: "ddim", label: "DDIM" },
+  { value: "uni_pc", label: "UniPC" },
 ] as const;
 
 export interface ImageGenerationParameters {
