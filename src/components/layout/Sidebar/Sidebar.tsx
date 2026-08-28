@@ -1,13 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Clapperboard, Sparkles, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Clapperboard,
+  Sparkles,
+  MessageSquare,
+  Plus,
+  History,
+} from "lucide-react";
 import { navItems, secondaryNavItems } from "@/components/options/SidebarOptions";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/store";
-import { useRouter } from "next/navigation";
+import { getAllTexts } from "@/services/textGenerate.service";
+import { TextGenerationData } from "@/types/textGeneration.types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -15,13 +23,40 @@ export const Sidebar = () => {
   const logout = useAuthStore((state) => state.logout);
   const user = useAuthStore((state) => state.user);
 
+  const [chatHistory, setChatHistory] = useState<TextGenerationData[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  const fetchChatHistory = async () => {
+    try {
+      const response = await getAllTexts();
+      setChatHistory(response.data || []);
+    } catch (error) {
+      console.error("Error al cargar historial de chat:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChatHistory();
+
+    const handleChatUpdated = () => {
+      fetchChatHistory();
+    };
+
+    window.addEventListener("cineflow:chat-updated", handleChatUpdated);
+    return () => {
+      window.removeEventListener("cineflow:chat-updated", handleChatUpdated);
+    };
+  }, []);
+
   return (
     <aside className="w-64 h-screen sticky top-0 flex flex-col justify-between bg-[#080b18] border-r border-indigo-500/10 text-slate-200 z-40 select-none">
       {/* Glow effect decorativo */}
       <div className="absolute top-0 left-0 w-full h-40 bg-indigo-600/5 blur-3xl pointer-events-none" />
 
-      {/* Header / Brand */}
-      <div>
+      {/* Header / Brand & Navigation */}
+      <div className="flex-1 flex flex-col min-h-0">
         <div className="p-5 flex items-center justify-center border-b border-indigo-500/10">
           <Link href="/dashboard" className="flex items-center justify-center gap-3 group">
             <div className="relative w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-violet-600 p-[1px] shadow-md shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
@@ -31,7 +66,9 @@ export const Sidebar = () => {
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg text-white tracking-tight leading-none">CineFlow</span>
+                <span className="font-extrabold text-lg text-white tracking-tight leading-none">
+                  CineFlow
+                </span>
                 <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded leading-none">
                   AI
                 </span>
@@ -59,7 +96,9 @@ export const Sidebar = () => {
           </p>
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/dashboard" && pathname.startsWith(`${item.href}`));
 
             return (
               <Link
@@ -91,22 +130,89 @@ export const Sidebar = () => {
             );
           })}
         </div>
+
+        {/* Historial Section */}
+        <div className="flex-1 flex flex-col min-h-0 px-3 py-2 border-t border-indigo-500/10">
+          <div className="flex items-center justify-between px-3 mb-2">
+            <div className="flex items-center gap-2 text-slate-400">
+              <History className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                Historial
+              </span>
+            </div>
+            <Link
+              href="/admin/chatTextGenerate"
+              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+              title="Nuevo chat"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="overflow-y-auto max-h-[305px] space-y-1 pr-1 custom-scrollbar">
+            {isLoadingHistory ? (
+              <div className="space-y-2 px-2 py-1">
+                <Skeleton className="h-7 w-full bg-slate-800/50 rounded-lg" />
+                <Skeleton className="h-7 w-full bg-slate-800/50 rounded-lg" />
+                <Skeleton className="h-7 w-full bg-slate-800/50 rounded-lg" />
+              </div>
+            ) : chatHistory.length === 0 ? (
+              <p className="px-3 py-3 text-xs text-slate-500 italic text-center">
+                Sin historial reciente
+              </p>
+            ) : (
+              chatHistory.map((chat) => {
+                const isChatActive = pathname === `/admin/chatTextGenerate/${chat.id}`;
+
+                return (
+                  <Link
+                    key={chat.id}
+                    href={`/admin/chatTextGenerate/${chat.id}`}
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-150 group",
+                      isChatActive
+                        ? "bg-indigo-600/20 text-white font-medium border border-indigo-500/30"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                    )}
+                    title={chat.prompt}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 shrink-0 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+
+                    <span className="truncate flex-1 text-xs">
+                      {chat.prompt}
+                    </span>
+
+                    {chat.status === "completed" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                    )}
+                    {(chat.status === "pending" || chat.status === "processing") && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                    )}
+                    {chat.status === "failed" && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                    )}
+                  </Link>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Footer Navigation & User Profile */}
       <div className="p-3 border-t border-indigo-500/10 space-y-2">
         {secondaryNavItems.map((item) => {
           const Icon = item.icon;
-          
+
           if (item.label === "Cerrar sesión") {
             return (
               <button
                 key={item.href}
                 onClick={() => {
                   logout();
-                  router.push("/"); // Usamos "/" asumiendo que ahí está el login
+                  router.push("/");
                 }}
-                className="w-full flex items-center justify-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                className="w-full flex items-center justify-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
               >
                 <Icon className="w-4 h-4 text-slate-400 group-hover:text-red-400" />
                 <span>{item.label}</span>
