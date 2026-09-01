@@ -1,7 +1,9 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { cn } from "@/lib/utils";
+
+import imagenes from "@/assets/imagesss.webp";
 
 export interface ShowcaseImage {
   id: string;
@@ -23,6 +25,8 @@ export const ImageCard: React.FC<ImageCardProps> = ({
   isSelected,
   onSelect,
 }) => {
+  const fallbackSrc = (imagenes as any)?.src || (imagenes as unknown as string);
+
   return (
     <div
       onClick={() => onSelect?.(image)}
@@ -35,9 +39,9 @@ export const ImageCard: React.FC<ImageCardProps> = ({
       )}
     >
       <img
-        src={image.imageUrl}
-        alt=""
-        className="w-full h-full object-cover pointer-events-none transition-transform duration-500 hover:scale-110"
+        src={image.imageUrl || fallbackSrc}
+        alt={image.title || ""}
+        className="w-full h-full object-contain p-2 pointer-events-none transition-transform duration-500 hover:scale-105"
         loading="eager"
       />
 

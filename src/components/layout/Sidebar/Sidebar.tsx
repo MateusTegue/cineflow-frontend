@@ -9,13 +9,21 @@ import {
   MessageSquare,
   Plus,
   History,
+  MoreHorizontal,
+  Share2,
+  Pencil,
+  Pin,
+  Archive,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { navItems, secondaryNavItems } from "@/components/options/SidebarOptions";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/store";
-import { getAllTexts } from "@/services/textGenerate.service";
+import { getAllTexts, deleteTextGeneration } from "@/services/textGenerate.service";
 import { TextGenerationData } from "@/types/textGeneration.types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export const Sidebar = () => {
   const pathname = usePathname();
@@ -25,6 +33,65 @@ export const Sidebar = () => {
 
   const [chatHistory, setChatHistory] = useState<TextGenerationData[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  // Estado para el menú de 3 puntos y modal de eliminación
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleOpenMenu = (e: React.MouseEvent, chatId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (activeMenuId === chatId) {
+      setActiveMenuId(null);
+      setMenuPosition(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const ESTIMATED_MENU_HEIGHT = 210;
+      const spaceBelow = window.innerHeight - rect.top;
+
+      let top = rect.top;
+      // Si no hay suficiente espacio abajo, alinear el menú hacia arriba
+      if (spaceBelow < ESTIMATED_MENU_HEIGHT) {
+        top = Math.max(10, rect.bottom - ESTIMATED_MENU_HEIGHT);
+      }
+
+      // Siempre mostrar el menú al lado derecho del botón/sidebar
+      const left = Math.max(
+        10,
+        Math.min(rect.right + 8, window.innerWidth - 200)
+      );
+
+      setMenuPosition({ top, left });
+      setActiveMenuId(chatId);
+    }
+  };
+
+  const handleDeleteChat = async () => {
+    if (!deleteTargetId) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteTextGeneration(deleteTargetId);
+      toast.success("Chat eliminado correctamente");
+
+      setChatHistory((prev) => prev.filter((item) => item.id !== deleteTargetId));
+
+      if (pathname === `/admin/chatTextGenerate/${deleteTargetId}`) {
+        router.push("/admin/chatTextGenerate");
+      }
+
+      window.dispatchEvent(new CustomEvent("cineflow:chat-updated"));
+    } catch (error: any) {
+      console.error("Error al eliminar chat:", error);
+      toast.error("No se pudo eliminar el chat");
+    } finally {
+      setIsDeleting(false);
+      setDeleteTargetId(null);
+    }
+  };
 
   const fetchChatHistory = async () => {
     try {
@@ -163,35 +230,52 @@ export const Sidebar = () => {
             ) : (
               chatHistory.map((chat) => {
                 const isChatActive = pathname === `/admin/chatTextGenerate/${chat.id}`;
+                const isMenuOpen = activeMenuId === chat.id;
 
                 return (
-                  <Link
+                  <div
                     key={chat.id}
-                    href={`/admin/chatTextGenerate/${chat.id}`}
                     className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all duration-150 group",
+                      "group relative flex items-center justify-between rounded-xl transition-all duration-150",
                       isChatActive
                         ? "bg-indigo-600/20 text-white font-medium border border-indigo-500/30"
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                     )}
-                    title={chat.prompt}
                   >
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                    <Link
+                      href={`/admin/chatTextGenerate/${chat.id}`}
+                      className="flex items-center gap-2 flex-1 min-w-0 px-2.5 py-2 text-xs"
+                      title={chat.prompt}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 shrink-0 text-slate-500 group-hover:text-indigo-400 transition-colors" />
 
-                    <span className="truncate flex-1 text-xs">
-                      {chat.prompt}
-                    </span>
+                      <span className="truncate flex-1 text-xs">
+                        {chat.prompt}
+                      </span>
 
-                    {chat.status === "completed" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                    )}
-                    {(chat.status === "pending" || chat.status === "processing") && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                    )}
-                    {chat.status === "failed" && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                    )}
-                  </Link>
+                      {chat.status === "completed" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                      )}
+                      {(chat.status === "pending" || chat.status === "processing") && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      )}
+                      {chat.status === "failed" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                      )}
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenMenu(e, chat.id)}
+                      className={cn(
+                        "p-1 mr-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all cursor-pointer shrink-0",
+                        isMenuOpen ? "opacity-100 bg-slate-700/60 text-white" : "opacity-0 group-hover:opacity-100"
+                      )}
+                      title="Opciones"
+                    >
+                      <MoreHorizontal className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 );
               })
             )}
@@ -251,6 +335,148 @@ export const Sidebar = () => {
           </div>
         </Link>
       </div>
+
+      {/* Popover Menu Opciones (3 Puntos) */}
+      {activeMenuId && menuPosition && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-transparent"
+            onClick={() => {
+              setActiveMenuId(null);
+              setMenuPosition(null);
+            }}
+          />
+          <div
+            style={{ top: menuPosition.top, left: menuPosition.left }}
+            className="fixed z-50 w-48 rounded-2xl bg-[#0f1117] border border-white/[0.08] shadow-[0_16px_40px_rgba(0,0,0,0.6)] p-1.5 text-xs text-slate-200 animate-in fade-in zoom-in-95 duration-100 space-y-0.5"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const activeChat = chatHistory.find((c) => c.id === activeMenuId);
+                if (activeChat) {
+                  navigator.clipboard.writeText(
+                    `${window.location.origin}/admin/chatTextGenerate/${activeChat.id}`
+                  );
+                  toast.success("Enlace copiado al portapapeles");
+                }
+                setActiveMenuId(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer text-left"
+            >
+              <Share2 className="w-4 h-4 text-slate-400" />
+              <span>Compartir</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast.info("Función para cambiar el nombre próximamente");
+                setActiveMenuId(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer text-left"
+            >
+              <Pencil className="w-4 h-4 text-slate-400" />
+              <span>Cambiar el nombre</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast.info("Chat fijado");
+                setActiveMenuId(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer text-left"
+            >
+              <Pin className="w-4 h-4 text-slate-400" />
+              <span>Fijar chat</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toast.info("Chat archivado");
+                setActiveMenuId(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer text-left"
+            >
+              <Archive className="w-4 h-4 text-slate-400" />
+              <span>Archivar</span>
+            </button>
+
+            <div className="my-1 border-t border-white/[0.08]" />
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteTargetId(activeMenuId);
+                setActiveMenuId(null);
+              }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer text-left font-medium"
+            >
+              <Trash2 className="w-4 h-4 text-red-400" />
+              <span>Eliminar</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Ventana Modal para Eliminar con el mismo bg que AssetCard */}
+      {deleteTargetId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in-0 duration-150 p-4"
+          onClick={() => setDeleteTargetId(null)}
+        >
+          <div
+            className="w-full max-w-sm mx-4 rounded-2xl border border-white/[0.08] bg-[#0f1117] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.7)] animate-in zoom-in-95 fade-in-0 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="flex size-12 items-center justify-center rounded-full border border-red-400/20 bg-red-500/10">
+                <Trash2 className="size-6 text-red-400" />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-semibold text-white">¿Eliminar esta conversación?</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Esta acción no se puede deshacer. La conversación será eliminada permanentemente.
+                </p>
+              </div>
+
+              <div className="flex w-full gap-3 pt-1">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteTargetId(null)}
+                  className="flex-1 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white cursor-pointer disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteChat}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-red-500/90 px-4 py-2.5 text-xs font-semibold text-white transition-all hover:bg-red-500 active:scale-[0.97] shadow-lg shadow-red-950/30 cursor-pointer disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      <span>Eliminando...</span>
+                    </>
+                  ) : (
+                    <span>Eliminar</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

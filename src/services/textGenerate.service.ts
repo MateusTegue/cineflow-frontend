@@ -68,3 +68,15 @@ export async function getAllTexts(): Promise<ApiResponse<TextGenerationData[]>> 
   return data;
 }
 
+export async function deleteTextGeneration(id: string): Promise<ApiResponse<null>> {
+  if (!BACKEND_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL no está configurada");
+  }
+
+  const { data } = await axios.delete<ApiResponse<null>>(
+    `${BACKEND_URL}/text-generation/${id}`
+  );
+
+  return data;
+}
+
